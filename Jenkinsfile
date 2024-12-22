@@ -9,8 +9,8 @@ pipeline {
         stage('Clone') {
             steps {
                 script {
-                    // Menarik kode dari repositori GitHub
-                    git 'https://github.com/Fitriawan-Arya-N/nodejs-app.git'
+                    // Menarik kode dari repositori GitHub, pastikan menggunakan cabang yang benar
+                    git url: 'https://github.com/Fitriawan-Arya-N/nodejs-app.git', branch: 'main' // Gunakan 'main' jika itu adalah cabang default repositori
                 }
             }
         }
