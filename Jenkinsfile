@@ -45,7 +45,7 @@ pipeline {
             echo 'Application Deployed Successfully!'
         }
         failure {
-            echo 'Pipeline Failed!'
+            echo 'Pipeline Failed ok!'
         }
     }
 }
