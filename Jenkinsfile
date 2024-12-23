@@ -12,7 +12,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build(DOCKER_IMAGE)
+                    docker.build("${DOCKER_IMAGE}", ".")
                 }
             }
         }
@@ -20,7 +20,7 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
-                        docker.image(DOCKER_IMAGE).push()
+                        docker.image("${DOCKER_IMAGE}").push()
                     }
                 }
             }
@@ -31,7 +31,7 @@ pipeline {
                     sh '''
                     docker stop nodejs-app || true
                     docker rm nodejs-app || true
-                    docker run -d --name nodejs-app -p 3000:3000 $DOCKER_IMAGE
+                    docker run -d --name nodejs-app -p 3000:3000 ${DOCKER_IMAGE}
                     '''
                 }
             }
@@ -45,7 +45,7 @@ pipeline {
             echo 'Application Deployed Successfully!'
         }
         failure {
-            echo 'Pipeline Failed ok!'
+            echo 'Pipeline Failed!'
         }
     }
 }
