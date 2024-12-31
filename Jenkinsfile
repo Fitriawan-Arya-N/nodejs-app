@@ -17,10 +17,7 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
-            agent {
-                docker { image 'node:22.12.0-alpine3.21' }
-            }
+        stage('installing docker on Jenkins'){
             steps {
                 script {
                     sh """
@@ -29,8 +26,18 @@ pipeline {
                         curl https://get.docker.com | sh
                         # Verifikasi Docker terinstal
                         docker --version
-                        docker build -t gcr.io/${GCP_PROJECT_ID}/${IMAGE_NAME}:latest .
                     """
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            agent {
+                docker { image 'node:22.12.0-alpine3.21' }
+            }
+            steps {
+                script {
+                    sh "docker build -t gcr.io/${GCP_PROJECT_ID}/${IMAGE_NAME}:latest ."
                 }
             }
         }
