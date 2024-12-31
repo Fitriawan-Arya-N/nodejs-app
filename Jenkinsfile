@@ -1,51 +1,74 @@
 pipeline {
     agent any
+
     environment {
-        DOCKER_IMAGE = 'fitriawanaryan/nodejs-app:latest'
+        GCP_PROJECT_ID = 'belajar-terraform-dan-ansible'
+        IMAGE_NAME = 'nodejs-app'
+        MIG_SINGAPORE = 'asia-sg-mig' // Nama MIG di Singapura
+        MIG_JAKARTA = 'asia-jkt-mig' // Nama MIG di Jakarta
+        REGION_SINGAPORE = 'asia-southeast1'
+        REGION_JAKARTA = 'asia-southeast2'
     }
+
     stages {
         stage('Checkout Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/Fitriawan-Arya-N/nodejs-app.git'
+                checkout scm
             }
         }
+
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build("${DOCKER_IMAGE}", ".")
+                    sh "docker build -t gcr.io/${GCP_PROJECT_ID}/${IMAGE_NAME}:latest ."
                 }
             }
         }
-        stage('Push to Docker Registry') {
+
+        stage('Push Docker Image to GCP Container Registry') {
             steps {
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
-                        docker.image("${DOCKER_IMAGE}").push()
+                    sh "gcloud auth configure-docker"
+                    sh "docker push gcr.io/${GCP_PROJECT_ID}/${IMAGE_NAME}:latest"
+                }
+            }
+        }
+
+        stage('Update MIGs') {
+            parallel {
+                stage('Update Singapore MIG') {
+                    steps {
+                        script {
+                            sh """
+                                gcloud compute instance-groups managed rolling-action start-update ${MIG_SINGAPORE} \
+                                    --region=${REGION_SINGAPORE} \
+                                    --version=template=gcr.io/${GCP_PROJECT_ID}/${IMAGE_NAME}:latest
+                            """
+                        }
+                    }
+                }
+
+                stage('Update Jakarta MIG') {
+                    steps {
+                        script {
+                            sh """
+                                gcloud compute instance-groups managed rolling-action start-update ${MIG_JAKARTA} \
+                                    --region=${REGION_JAKARTA} \
+                                    --version=template=gcr.io/${GCP_PROJECT_ID}/${IMAGE_NAME}:latest
+                            """
+                        }
                     }
                 }
             }
         }
-        stage('Deploy Application') {
-            steps {
-                script {
-                    sh '''
-                    docker stop nodejs-app || true
-                    docker rm nodejs-app || true
-                    docker run -d --name nodejs-app -p 3000:3000 ${DOCKER_IMAGE}
-                    '''
-                }
-            }
-        }
     }
+
     post {
-        always {
-            echo 'Pipeline Completed'
-        }
         success {
-            echo 'Application Deployed Successfully!'
+            echo 'Deployment to MIGs completed successfully!'
         }
         failure {
-            echo 'Pipeline Failed!'
+            echo 'Deployment failed. Please check the logs.'
         }
     }
 }
