@@ -28,6 +28,8 @@ pipeline {
         stage('Push Docker Image to GCP Container Registry') {
             steps {
                 script {
+                withCredentials([file(credentialsId: 'gcp-jenkins-vm', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                    sh "gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}"
                     sh "gcloud auth configure-docker"
                     sh "docker push gcr.io/${GCP_PROJECT_ID}/${IMAGE_NAME}:latest"
                 }
