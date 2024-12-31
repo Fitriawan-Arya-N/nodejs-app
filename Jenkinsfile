@@ -1,6 +1,9 @@
 pipeline {
     agent {
-        docker { image 'docker:24.0.1' }
+        docker {
+            image 'docker:24.0.1-dind'
+            args '--privileged'
+        }
     }
 
     environment {
