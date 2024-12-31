@@ -1,5 +1,7 @@
 pipeline {
-    agent any
+    agent {
+        docker { image 'docker:24.0.1' }
+    }
 
     environment {
         GCP_PROJECT_ID = 'belajar-terraform-dan-ansible'
@@ -17,14 +19,12 @@ pipeline {
             }
         }
 
-        stage('installing docker on Jenkins'){
+        stage('Install Docker Tools') {
             steps {
                 script {
                     sh """
-                        # Instal Docker di dalam kontainer
                         apk update && apk add --no-cache curl
-                        curl https://get.docker.com | sh
-                        # Verifikasi Docker terinstal
+                        curl -fsSL https://get.docker.com | sh
                         docker --version
                     """
                 }
@@ -32,9 +32,6 @@ pipeline {
         }
 
         stage('Build Docker Image') {
-            agent {
-                docker { image 'node:22.12.0-alpine3.21' }
-            }
             steps {
                 script {
                     sh "docker build -t gcr.io/${GCP_PROJECT_ID}/${IMAGE_NAME}:latest ."
@@ -46,7 +43,6 @@ pipeline {
             steps {
                 script {
                     withCredentials([file(credentialsId: 'gcp-service-account', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
-                        // Aktifkan akun layanan GCP menggunakan kredensial yang telah diatur
                         sh "gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}"
                         sh "gcloud auth configure-docker"
                         sh "docker push gcr.io/${GCP_PROJECT_ID}/${IMAGE_NAME}:latest"
@@ -61,7 +57,6 @@ pipeline {
                     steps {
                         script {
                             withCredentials([file(credentialsId: 'gcp-service-account', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
-                                // Aktifkan akun layanan untuk update MIG
                                 sh """
                                     gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
                                     gcloud compute instance-groups managed rolling-action start-update ${MIG_SINGAPORE} \
@@ -77,7 +72,6 @@ pipeline {
                     steps {
                         script {
                             withCredentials([file(credentialsId: 'gcp-service-account', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
-                                // Aktifkan akun layanan untuk update MIG
                                 sh """
                                     gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
                                     gcloud compute instance-groups managed rolling-action start-update ${MIG_JAKARTA} \
