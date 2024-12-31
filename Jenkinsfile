@@ -23,7 +23,14 @@ pipeline {
             }
             steps {
                 script {
-                    sh "docker build -t gcr.io/${GCP_PROJECT_ID}/${IMAGE_NAME}:latest ."
+                    sh """
+                        # Instal Docker di dalam kontainer
+                        apk update && apk add --no-cache curl
+                        curl https://get.docker.com | sh
+                        # Verifikasi Docker terinstal
+                        docker --version
+                        docker build -t gcr.io/${GCP_PROJECT_ID}/${IMAGE_NAME}:latest .
+                    """
                 }
             }
         }
