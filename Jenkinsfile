@@ -8,6 +8,8 @@ pipeline {
         MIG_JAKARTA = 'asia-jkt-mig' // Nama MIG di Jakarta
         REGION_SINGAPORE = 'asia-southeast1'
         REGION_JAKARTA = 'asia-southeast2'
+        REPOSITORY_NAME = 'nodejs-docker-image-repo'
+
     }
 
     stages {
@@ -20,19 +22,19 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh "docker build -t gcr.io/${GCP_PROJECT_ID}/${IMAGE_NAME}:latest ."
+                    sh "docker build -t gcr.io/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest ."
                 }
             }
         }
 
-        stage('Push Docker Image to GCP Container Registry') {
+        stage('Push Docker Image to GCP Artifact Registry') {
             steps {
                 script {
-                    // Autentikasi dengan kredensial GCP menggunakan Jenkins Credentials Plugin
+
                     withCredentials([file(credentialsId: 'gcp-jenkins-vm', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
                         sh "gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}"
                         sh "gcloud auth configure-docker"
-                        sh "docker push gcr.io/${GCP_PROJECT_ID}/${IMAGE_NAME}:latest"
+                        sh "docker push gcr.io/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest"
                     }
                 }
             }
@@ -46,7 +48,7 @@ pipeline {
                             sh """
                                 gcloud compute instance-groups managed rolling-action start-update ${MIG_SINGAPORE} \
                                     --region=${REGION_SINGAPORE} \
-                                    --version=template=gcr.io/${GCP_PROJECT_ID}/${IMAGE_NAME}:latest
+                                    --version=template=gcr.io/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest
                             """
                         }
                     }
@@ -58,7 +60,7 @@ pipeline {
                             sh """
                                 gcloud compute instance-groups managed rolling-action start-update ${MIG_JAKARTA} \
                                     --region=${REGION_JAKARTA} \
-                                    --version=template=gcr.io/${GCP_PROJECT_ID}/${IMAGE_NAME}:latest
+                                    --version=template=gcr.io/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest
                             """
                         }
                     }
