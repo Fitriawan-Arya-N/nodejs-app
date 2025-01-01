@@ -74,7 +74,7 @@ pipeline {
                         export PATH=/opt/google-cloud-sdk/bin:\$PATH                    
                         gcloud compute ssh ${SG_VM_INSTANCE} --zone ${ZONE_SINGAPORE} --verbosity debug --command '
                             export PATH=/opt/google-cloud-sdk/bin:\$PATH && \
-                            gcloud auth configure-docker asia-southeast2-docker.pkg.dev --quiet && \                
+                            gcloud auth configure-docker asia-southeast2-docker.pkg.dev --quiet && \
                             docker pull asia-southeast2-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest && \
                             docker stop nodejs-app || true && \
                             docker rm nodejs-app || true && \
