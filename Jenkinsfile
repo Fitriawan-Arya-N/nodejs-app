@@ -32,7 +32,6 @@ pipeline {
             steps {
                 withCredentials([file(credentialsId: 'gcp-jenkins-vm', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
                     script {
-                        // Menambahkan PATH ke gcloud secara eksplisit
                         sh """
                             export PATH=/opt/google-cloud-sdk/bin:\$PATH
                             gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
@@ -47,6 +46,7 @@ pipeline {
             steps {
                 script {
                     sh """
+                        docker rmi -f asia-southeast2-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest || true
                         docker build -t asia-southeast2-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest .
                     """
                 }
@@ -109,6 +109,9 @@ pipeline {
     post {
         success {
             echo 'Deployment to MIGs completed successfully!!'
+        }
+        failure {
+            echo 'Deployment failed. Check the logs for details.'
         }
     }
 }
