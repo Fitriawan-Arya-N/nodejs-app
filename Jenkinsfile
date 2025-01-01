@@ -32,7 +32,7 @@ pipeline {
                     script {
                         // Menambahkan PATH ke gcloud secara eksplisit
                         sh """
-                            export PATH=\$PATH:/root/google-cloud-sdk/bin
+                            export PATH=/opt/google-cloud-sdk/bin:\$PATH
                             gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
                             gcloud config set project ${GCP_PROJECT_ID}
                             gcloud auth configure-docker
