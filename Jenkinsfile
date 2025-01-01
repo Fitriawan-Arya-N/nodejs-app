@@ -1,10 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'google/cloud-sdk:slim'
-            args '-v /tmp/.config:/root/.config' // Membuat file kredensial dapat diakses oleh container
-        }
-    }
+    agent any
 
     environment {
         GCP_PROJECT_ID = 'belajar-terraform-dan-ansible'
@@ -14,7 +9,6 @@ pipeline {
         REGION_SINGAPORE = 'asia-southeast1'
         REGION_JAKARTA = 'asia-southeast2'
         REPOSITORY_NAME = 'nodejs-docker-image-repo'
-
     }
 
     stages {
@@ -33,12 +27,20 @@ pipeline {
         }
 
         stage('Push Docker Image to GCP Artifact Registry') {
+            agent {
+                docker {
+                    image 'google/cloud-sdk:slim'
+                    args '-v /tmp/.config:/root/.config' // Ensure the GCP credentials are accessible
+                }
+            }
             steps {
-                script {
-
-                    withCredentials([file(credentialsId: 'gcp-jenkins-vm', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                withCredentials([file(credentialsId: 'gcp-jenkins-vm', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                    script {
+                        // Authenticate to GCP using the credentials
                         sh "gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}"
                         sh "gcloud auth configure-docker"
+
+                        // Push Docker Image to Artifact Registry
                         sh "docker push gcr.io/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest"
                     }
                 }
@@ -80,4 +82,3 @@ pipeline {
         }
     }
 }
-
