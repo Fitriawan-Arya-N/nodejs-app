@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'google/cloud-sdk:slim'
+            args '-v /tmp/.config:/root/.config' // Membuat file kredensial dapat diakses oleh container
+        }
+    }
 
     environment {
         GCP_PROJECT_ID = 'belajar-terraform-dan-ansible'
