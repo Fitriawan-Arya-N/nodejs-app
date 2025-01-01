@@ -74,7 +74,7 @@ pipeline {
                                 export PATH=/opt/google-cloud-sdk/bin:\$PATH
                                 gcloud compute instance-groups managed rolling-action start-update ${MIG_SINGAPORE} \
                                     --region=${REGION_SINGAPORE} \
-                                    --version=template=asia-southeast2-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest
+                                    --version=template=asia-sg-template
                             """
                         }
                     }
@@ -87,21 +87,21 @@ pipeline {
                                 export PATH=/opt/google-cloud-sdk/bin:\$PATH
                                 gcloud compute instance-groups managed rolling-action start-update ${MIG_JAKARTA} \
                                     --region=${REGION_JAKARTA} \
-                                    --version=template=asia-southeast2-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest
+                                    --version=template=asia-jkt-template
                             """
                         }
                     }
                 }
-                stage('Cleanup Docker Images') {
-                    steps {
-                        script {
-                            sh """
-                                docker image prune -f
-                            """
-                        }
-                    }
-                }
+            }
+        }
 
+        stage('Cleanup Docker Images') {
+            steps {
+                script {
+                    sh """
+                        docker image prune -f
+                    """
+                }
             }
         }
     }
