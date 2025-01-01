@@ -37,7 +37,7 @@ pipeline {
                             export PATH=/opt/google-cloud-sdk/bin:\$PATH
                             gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
                             gcloud config set project ${GCP_PROJECT_ID}
-                            gcloud auth configure-docker asia-southeast2-docker.pkg.dev
+                            sudo gcloud auth configure-docker asia-southeast2-docker.pkg.dev
                         """
                     }
                 }
