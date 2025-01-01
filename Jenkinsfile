@@ -22,10 +22,13 @@ pipeline {
             steps {
                 withCredentials([file(credentialsId: 'gcp-jenkins-vm', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
                     script {
-                        // Authenticate with Google Cloud using the service account credentials
-                        sh "gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}"
-                        sh "gcloud config set project ${GCP_PROJECT_ID}"
-                        sh "gcloud auth configure-docker"
+                        // Menambahkan PATH ke gcloud secara eksplisit
+                        sh """
+                            export PATH=\$PATH:/root/google-cloud-sdk/bin
+                            gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
+                            gcloud config set project ${GCP_PROJECT_ID}
+                            gcloud auth configure-docker
+                        """
                     }
                 }
             }
@@ -53,6 +56,7 @@ pipeline {
                     steps {
                         script {
                             sh """
+                                export PATH=\$PATH:/root/google-cloud-sdk/bin
                                 gcloud compute instance-groups managed rolling-action start-update ${MIG_SINGAPORE} \
                                     --region=${REGION_SINGAPORE} \
                                     --version=template=gcr.io/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest
@@ -65,6 +69,7 @@ pipeline {
                     steps {
                         script {
                             sh """
+                                export PATH=\$PATH:/root/google-cloud-sdk/bin
                                 gcloud compute instance-groups managed rolling-action start-update ${MIG_JAKARTA} \
                                     --region=${REGION_JAKARTA} \
                                     --version=template=gcr.io/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest
