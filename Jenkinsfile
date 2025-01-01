@@ -78,8 +78,7 @@ pipeline {
 
     post {
         success {
-            echo 'Deployment to MIGs completed successfully!'
+            echo 'Deployment to MIGs completed successfully!!'
         }
     }
 }
-
