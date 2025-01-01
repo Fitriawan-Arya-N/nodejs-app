@@ -69,10 +69,9 @@ pipeline {
         stage('Deploy to Singapore VM') {
             steps {
                 script {
-                    // SSH ke VM instance di Singapore dan pull Docker image
                     sh """
                         export PATH=/opt/google-cloud-sdk/bin:\$PATH                    
-                        gcloud compute ssh ${SG_VM_INSTANCE} --zone ${ZONE_SINGAPORE} --command 'docker pull ${REGION_JAKARTA}-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest && \
+                        gcloud compute ssh ${SG_VM_INSTANCE} --zone ${ZONE_SINGAPORE} --ssh-flag="-vv" --command 'docker pull ${REGION_JAKARTA}-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest && \
                             docker run -d --name nodejs-app ${REGION_JAKARTA}-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest'
                     """
                 }
@@ -82,10 +81,9 @@ pipeline {
         stage('Deploy to Jakarta VM') {
             steps {
                 script {
-                    // SSH ke VM instance di Jakarta dan pull Docker image
                     sh """
                         export PATH=/opt/google-cloud-sdk/bin:\$PATH                    
-                        gcloud compute ssh ${JKT_VM_INSTANCE} --zone ${ZONE_JAKARTA} --command 'docker pull ${REGION_JAKARTA}-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest && \
+                        gcloud compute ssh ${JKT_VM_INSTANCE} --zone ${ZONE_JAKARTA} --ssh-flag="-vv" --command 'docker pull ${REGION_JAKARTA}-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest && \
                             docker run -d --name nodejs-app ${REGION_JAKARTA}-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest'
                     """
                 }
