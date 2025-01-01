@@ -4,8 +4,8 @@ pipeline {
     environment {
         GCP_PROJECT_ID = 'belajar-terraform-dan-ansible'
         IMAGE_NAME = 'nodejs-app'
-        MIG_SINGAPORE = 'asia-sg-mig' // Nama MIG di Singapura
-        MIG_JAKARTA = 'asia-jkt-mig' // Nama MIG di Jakarta
+        MIG_SINGAPORE = 'asia-sg-mig'
+        MIG_JAKARTA = 'asia-jkt-mig'
         REGION_SINGAPORE = 'asia-southeast1'
         REGION_JAKARTA = 'asia-southeast2'
         REPOSITORY_NAME = 'nodejs-docker-image-repo'
@@ -18,6 +18,19 @@ pipeline {
             }
         }
 
+        stage('Authenticate with GCP') {
+            steps {
+                withCredentials([file(credentialsId: 'gcp-jenkins-vm', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                    script {
+                        // Authenticate with Google Cloud using the service account credentials
+                        sh "gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}"
+                        sh "gcloud config set project ${GCP_PROJECT_ID}"
+                        sh "gcloud auth configure-docker"
+                    }
+                }
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 script {
@@ -27,22 +40,9 @@ pipeline {
         }
 
         stage('Push Docker Image to GCP Artifact Registry') {
-            agent {
-                docker {
-                    image 'google/cloud-sdk:slim'
-                    args '-v /tmp/.config:/root/.config' // Ensure the GCP credentials are accessible
-                }
-            }
             steps {
-                withCredentials([file(credentialsId: 'gcp-jenkins-vm', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
-                    script {
-                        // Authenticate to GCP using the credentials
-                        sh "gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}"
-                        sh "gcloud auth configure-docker"
-
-                        // Push Docker Image to Artifact Registry
-                        sh "docker push gcr.io/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest"
-                    }
+                script {
+                    sh "docker push gcr.io/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest"
                 }
             }
         }
