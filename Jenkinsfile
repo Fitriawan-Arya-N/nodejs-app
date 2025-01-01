@@ -57,6 +57,7 @@ pipeline {
             steps {
                 script {
                     sh """
+                        export PATH=/opt/google-cloud-sdk/bin:\$PATH
                         gcloud auth configure-docker asia-southeast2-docker.pkg.dev
                         docker push asia-southeast2-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest
                     """
