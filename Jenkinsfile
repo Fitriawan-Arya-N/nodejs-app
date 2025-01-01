@@ -72,7 +72,7 @@ pipeline {
                     sh """
                         export PATH=/opt/google-cloud-sdk/bin:\$PATH                    
                         gcloud compute ssh ${SG_VM_INSTANCE} --zone ${ZONE_SINGAPORE} --verbosity debug --command 'docker pull ${REGION_JAKARTA}-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest && \
-                            docker run -d --name nodejs-app ${REGION_JAKARTA}-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest'
+                            docker run -d --name nodejs-app asia-southeast2-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest'
                     """
                 }
             }
@@ -84,7 +84,7 @@ pipeline {
                     sh """
                         export PATH=/opt/google-cloud-sdk/bin:\$PATH                    
                         gcloud compute ssh ${JKT_VM_INSTANCE} --zone ${ZONE_JAKARTA} --verbosity debug --command 'docker pull ${REGION_JAKARTA}-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest && \
-                            docker run -d --name nodejs-app ${REGION_JAKARTA}-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest'
+                            docker run -d --name nodejs-app asia-southeast2-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest'
                     """
                 }
             }
