@@ -75,6 +75,7 @@ pipeline {
                         gcloud compute ssh ${SG_VM_INSTANCE} --zone ${ZONE_SINGAPORE} --command '
                             docker pull ${REGION_JAKARTA}-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest &&
                             docker run -d --name nodejs-app ${REGION_JAKARTA}-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest
+                        '
                     """
                 }
             }
@@ -89,6 +90,7 @@ pipeline {
                         gcloud compute ssh ${JKT_VM_INSTANCE} --zone ${ZONE_JAKARTA} --command '
                             docker pull ${REGION_JAKARTA}-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest &&
                             docker run -d --name nodejs-app ${REGION_JAKARTA}-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest
+                        '
                     """
                 }
             }
