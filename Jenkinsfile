@@ -17,7 +17,15 @@ pipeline {
                 checkout scm
             }
         }
-
+        stage('Debug PATH and Permissions') {
+            steps {
+                sh """
+                    echo \$PATH
+                    ls -l /opt/google-cloud-sdk/bin/gcloud
+                    /opt/google-cloud-sdk/bin/gcloud --version
+                """
+            }
+        }
         stage('Authenticate with GCP') {
             steps {
                 withCredentials([file(credentialsId: 'gcp-jenkins-vm', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
