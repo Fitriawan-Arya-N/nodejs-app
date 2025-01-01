@@ -66,13 +66,18 @@ pipeline {
                 }
             }
         }
+
         stage('Deploy to Singapore VM') {
             steps {
                 script {
                     sh """
                         export PATH=/opt/google-cloud-sdk/bin:\$PATH                    
-                        gcloud compute ssh ${SG_VM_INSTANCE} --zone ${ZONE_SINGAPORE} --verbosity debug --command 'docker pull ${REGION_JAKARTA}-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest && \
-                            docker run -d --name nodejs-app asia-southeast2-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest'
+                        gcloud compute ssh ${SG_VM_INSTANCE} --zone ${ZONE_SINGAPORE} --verbosity debug --command '
+                            docker pull asia-southeast2-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest && \
+                            docker stop nodejs-app || true && \
+                            docker rm nodejs-app || true && \
+                            docker run -d --name nodejs-app asia-southeast2-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest
+                        '
                     """
                 }
             }
@@ -83,12 +88,17 @@ pipeline {
                 script {
                     sh """
                         export PATH=/opt/google-cloud-sdk/bin:\$PATH                    
-                        gcloud compute ssh ${JKT_VM_INSTANCE} --zone ${ZONE_JAKARTA} --verbosity debug --command 'docker pull ${REGION_JAKARTA}-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest && \
-                            docker run -d --name nodejs-app asia-southeast2-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest'
+                        gcloud compute ssh ${JKT_VM_INSTANCE} --zone ${ZONE_JAKARTA} --verbosity debug --command '
+                            docker pull asia-southeast2-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest && \
+                            docker stop nodejs-app || true && \
+                            docker rm nodejs-app || true && \
+                            docker run -d --name nodejs-app asia-southeast2-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest
+                        '
                     """
                 }
             }
         }
+
         stage('Cleanup Docker Images') {
             steps {
                 script {
