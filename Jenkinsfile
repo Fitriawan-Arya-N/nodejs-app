@@ -65,34 +65,24 @@ pipeline {
             }
         }
 
-        stage('Update MIGs') {
-            parallel {
-                stage('Update Singapore MIG') {
-                    steps {
-                        script {
-                            sh """
-                                export PATH=/opt/google-cloud-sdk/bin:\$PATH
-                                gcloud auth list
-                                gcloud compute instance-groups managed rolling-action start-update ${MIG_SINGAPORE} \
-                                    --region=${REGION_SINGAPORE} \
-                                    --version=template=https://compute.googleapis.com/compute/v1/projects/${GCP_PROJECT_ID}/global/instanceTemplates/asia-sg-template
-                            """
-                        }
-                    }
-                }
+        stage('Deploy to MIG in Singapore and Jakarta') {
+            steps {
+                script {
+                    sh """
+                        # Deploy to Singapore MIG
+                        gcloud compute instance-groups managed rolling-action start-update ${MIG_SINGAPORE} \
+                            --image asia-southeast2-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest \
+                            --image-project ${GCP_PROJECT_ID} \
+                            --region ${REGION_SINGAPORE} \
+                            --mode=single
 
-                stage('Update Jakarta MIG') {
-                    steps {
-                        script {
-                            sh """
-                                export PATH=/opt/google-cloud-sdk/bin:\$PATH
-                                gcloud auth list
-                                gcloud compute instance-groups managed rolling-action start-update ${MIG_JAKARTA} \
-                                    --region=${REGION_JAKARTA} \
-                                    --version=template=https://compute.googleapis.com/compute/v1/projects/${GCP_PROJECT_ID}/global/instanceTemplates/asia-jkt-template
-                            """
-                        }
-                    }
+                        # Deploy to Jakarta MIG
+                        gcloud compute instance-groups managed rolling-action start-update ${MIG_JAKARTA} \
+                            --image asia-southeast2-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest \
+                            --image-project ${GCP_PROJECT_ID} \
+                            --region ${REGION_JAKARTA} \
+                            --mode=single
+                    """
                 }
             }
         }
