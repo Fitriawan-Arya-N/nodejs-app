@@ -68,17 +68,17 @@ pipeline {
         stage('Deploy to MIG in Singapore and Jakarta') {
             steps {
                 script {
+                    // Update Singapore MIG with the existing image and existing instance template
                     sh """
-                        # Deploy to Singapore MIG
-                        export PATH=/opt/google-cloud-sdk/bin:\$PATH
                         gcloud compute instance-groups managed rolling-action start-update ${MIG_SINGAPORE} \
                             --image asia-southeast2-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest \
                             --image-project ${GCP_PROJECT_ID} \
                             --region ${REGION_SINGAPORE} \
                             --mode=single
+                    """
 
-                        # Deploy to Jakarta MIG
-                        export PATH=/opt/google-cloud-sdk/bin:\$PATH                        
+                    // Update Jakarta MIG with the existing image and existing instance template
+                    sh """
                         gcloud compute instance-groups managed rolling-action start-update ${MIG_JAKARTA} \
                             --image asia-southeast2-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest \
                             --image-project ${GCP_PROJECT_ID} \
