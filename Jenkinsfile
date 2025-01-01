@@ -4,11 +4,13 @@ pipeline {
     environment {
         GCP_PROJECT_ID = 'belajar-terraform-dan-ansible'
         IMAGE_NAME = 'nodejs-app'
-        MIG_SINGAPORE = 'asia-sg-mig'
-        MIG_JAKARTA = 'asia-jkt-mig'
         REGION_SINGAPORE = 'asia-southeast1'
+        ZONE_SINGAPORE = 'asia-southeast1-a'
         REGION_JAKARTA = 'asia-southeast2'
+        ZONE_JAKARTA = 'asia-southeast2-a'
         REPOSITORY_NAME = 'nodejs-docker-image-repo'
+        SG_VM_INSTANCE = 'sg-nodeapp-instance'
+        JKT_VM_INSTANCE = 'jkt-nodeapp-instance'
     }
 
     stages {
@@ -64,31 +66,31 @@ pipeline {
                 }
             }
         }
-
-        stage('Deploy to MIG in Singapore and Jakarta') {
+        stage('Deploy to Singapore VM') {
             steps {
                 script {
-                    // Update Singapore MIG with the existing image and existing instance template
-                    sh """
-                        export PATH=/opt/google-cloud-sdk/bin:\$PATH
-                        gcloud compute instance-groups managed rolling-action start-update ${MIG_SINGAPORE} \
-                            --target-image asia-southeast2-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest \
-                            --region ${REGION_SINGAPORE} \
-                            --zone=asia-southeast1-c
-                    """
-
-                    // Update Jakarta MIG with the existing image and existing instance template
+                    // SSH ke VM instance di Singapore dan pull Docker image
                     sh """
                         export PATH=/opt/google-cloud-sdk/bin:\$PATH                    
-                        gcloud compute instance-groups managed rolling-action start-update ${MIG_JAKARTA} \
-                            --target-image asia-southeast2-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest \
-                            --region ${REGION_JAKARTA} \
-                            --zone=asia-southeast2-c
+                        gcloud compute ssh ${SG_VM_INSTANCE} --zone ${ZONE_SINGAPORE} -- 'docker pull ${REGION_JAKARTA}-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest'
+                        gcloud compute ssh ${SG_VM_INSTANCE} --zone ${ZONE_SINGAPORE} -- 'docker run -d --name nodejs-app ${REGION_SINGAPORE}-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest'
                     """
                 }
             }
         }
 
+        stage('Deploy to Jakarta VM') {
+            steps {
+                script {
+                    // SSH ke VM instance di Jakarta dan pull Docker image
+                    sh """
+                        export PATH=/opt/google-cloud-sdk/bin:\$PATH                    
+                        gcloud compute ssh ${JKT_VM_INSTANCE} --zone ${ZONE_JAKARTA} -- 'docker pull ${REGION_JAKARTA}-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest'
+                        gcloud compute ssh ${JKT_VM_INSTANCE} --zone ${ZONE_JAKARTA} -- 'docker run -d --name nodejs-app ${REGION_JAKARTA}-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest'
+                    """
+                }
+            }
+        }
         stage('Cleanup Docker Images') {
             steps {
                 script {
