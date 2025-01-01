@@ -75,7 +75,7 @@ pipeline {
                                 gcloud auth list
                                 gcloud compute instance-groups managed rolling-action start-update ${MIG_SINGAPORE} \
                                     --region=${REGION_SINGAPORE} \
-                                    --version=https://compute.googleapis.com/compute/v1/projects/${GCP_PROJECT_ID}/global/instanceTemplates/asia-sg-template
+                                    --version=template=/asia-sg-template
                             """
                         }
                     }
@@ -89,7 +89,7 @@ pipeline {
                                 gcloud auth list
                                 gcloud compute instance-groups managed rolling-action start-update ${MIG_JAKARTA} \
                                     --region=${REGION_JAKARTA} \
-                                    --version=https://compute.googleapis.com/compute/v1/projects/${GCP_PROJECT_ID}/global/instanceTemplates/asia-jkt-template
+                                    --version=template=asia-jkt-template
                             """
                         }
                     }
