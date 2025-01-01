@@ -70,6 +70,7 @@ pipeline {
                 script {
                     sh """
                         # Deploy to Singapore MIG
+                        export PATH=/opt/google-cloud-sdk/bin:\$PATH
                         gcloud compute instance-groups managed rolling-action start-update ${MIG_SINGAPORE} \
                             --image asia-southeast2-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest \
                             --image-project ${GCP_PROJECT_ID} \
@@ -77,6 +78,7 @@ pipeline {
                             --mode=single
 
                         # Deploy to Jakarta MIG
+                        export PATH=/opt/google-cloud-sdk/bin:\$PATH                        
                         gcloud compute instance-groups managed rolling-action start-update ${MIG_JAKARTA} \
                             --image asia-southeast2-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest \
                             --image-project ${GCP_PROJECT_ID} \
