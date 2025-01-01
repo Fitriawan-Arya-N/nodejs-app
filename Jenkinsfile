@@ -72,8 +72,9 @@ pipeline {
                     // SSH ke VM instance di Singapore dan pull Docker image
                     sh """
                         export PATH=/opt/google-cloud-sdk/bin:\$PATH                    
-                        gcloud compute ssh ${SG_VM_INSTANCE} --zone ${ZONE_SINGAPORE} -- 'docker pull ${REGION_JAKARTA}-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest'
-                        gcloud compute ssh ${SG_VM_INSTANCE} --zone ${ZONE_SINGAPORE} -- 'docker run -d --name nodejs-app ${REGION_SINGAPORE}-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest'
+                        gcloud compute ssh ${SG_VM_INSTANCE} --zone ${ZONE_SINGAPORE} --command '
+                            docker pull ${REGION_JAKARTA}-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest &&
+                            docker run -d --name nodejs-app ${REGION_JAKARTA}-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest
                     """
                 }
             }
@@ -85,8 +86,9 @@ pipeline {
                     // SSH ke VM instance di Jakarta dan pull Docker image
                     sh """
                         export PATH=/opt/google-cloud-sdk/bin:\$PATH                    
-                        gcloud compute ssh ${JKT_VM_INSTANCE} --zone ${ZONE_JAKARTA} -- 'docker pull ${REGION_JAKARTA}-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest'
-                        gcloud compute ssh ${JKT_VM_INSTANCE} --zone ${ZONE_JAKARTA} -- 'docker run -d --name nodejs-app ${REGION_JAKARTA}-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest'
+                        gcloud compute ssh ${JKT_VM_INSTANCE} --zone ${ZONE_JAKARTA} --command '
+                            docker pull ${REGION_JAKARTA}-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest &&
+                            docker run -d --name nodejs-app ${REGION_JAKARTA}-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest
                     """
                 }
             }
