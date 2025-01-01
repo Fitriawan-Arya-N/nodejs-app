@@ -17,6 +17,7 @@ pipeline {
                 checkout scm
             }
         }
+
         stage('Debug PATH and Permissions') {
             steps {
                 sh """
@@ -26,6 +27,7 @@ pipeline {
                 """
             }
         }
+
         stage('Authenticate with GCP') {
             steps {
                 withCredentials([file(credentialsId: 'gcp-jenkins-vm', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
@@ -35,7 +37,7 @@ pipeline {
                             export PATH=/opt/google-cloud-sdk/bin:\$PATH
                             gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
                             gcloud config set project ${GCP_PROJECT_ID}
-                            gcloud auth configure-docker
+                            gcloud auth configure-docker asia-southeast2-docker.pkg.dev
                         """
                     }
                 }
@@ -45,7 +47,9 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh "docker build -t gcr.io/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest ."
+                    sh """
+                        docker build -t asia-southeast2-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest .
+                    """
                 }
             }
         }
@@ -53,7 +57,9 @@ pipeline {
         stage('Push Docker Image to GCP Artifact Registry') {
             steps {
                 script {
-                    sh "docker push gcr.io/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest"
+                    sh """
+                        docker push asia-southeast2-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest
+                    """
                 }
             }
         }
@@ -67,7 +73,7 @@ pipeline {
                                 export PATH=\$PATH:/root/google-cloud-sdk/bin
                                 gcloud compute instance-groups managed rolling-action start-update ${MIG_SINGAPORE} \
                                     --region=${REGION_SINGAPORE} \
-                                    --version=template=gcr.io/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest
+                                    --version=template=asia-southeast2-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest
                             """
                         }
                     }
@@ -80,7 +86,7 @@ pipeline {
                                 export PATH=\$PATH:/root/google-cloud-sdk/bin
                                 gcloud compute instance-groups managed rolling-action start-update ${MIG_JAKARTA} \
                                     --region=${REGION_JAKARTA} \
-                                    --version=template=gcr.io/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest
+                                    --version=template=asia-southeast2-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest
                             """
                         }
                     }
