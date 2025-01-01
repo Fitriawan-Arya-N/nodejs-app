@@ -72,7 +72,7 @@ pipeline {
             echo 'Deployment to MIGs completed successfully!'
         }
         failure {
-            echo 'Deployment failed. Please check the logs.'
+            echo 'Deployment failed. Please check the logs!.'
         }
     }
 }
