@@ -72,20 +72,18 @@ pipeline {
                     sh """
                         export PATH=/opt/google-cloud-sdk/bin:\$PATH
                         gcloud compute instance-groups managed rolling-action start-update ${MIG_SINGAPORE} \
-                            --image asia-southeast2-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest \
-                            --image-project ${GCP_PROJECT_ID} \
+                            --target-image asia-southeast2-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest \
                             --region ${REGION_SINGAPORE} \
-                            --mode=single
+                            --zone=asia-southeast1-c
                     """
 
                     // Update Jakarta MIG with the existing image and existing instance template
                     sh """
                         export PATH=/opt/google-cloud-sdk/bin:\$PATH                    
                         gcloud compute instance-groups managed rolling-action start-update ${MIG_JAKARTA} \
-                            --image asia-southeast2-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest \
-                            --image-project ${GCP_PROJECT_ID} \
+                            --target-image asia-southeast2-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY_NAME}/${IMAGE_NAME}:latest \
                             --region ${REGION_JAKARTA} \
-                            --mode=single
+                            --zone=asia-southeast2-c
                     """
                 }
             }
